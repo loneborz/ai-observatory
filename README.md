@@ -1,0 +1,95 @@
+# AI Usage Observatory
+
+A lightweight native macOS menu bar utility for viewing current **Codex / ChatGPT plan usage** at a glance.
+
+AI coding limits are useful operational information, but they usually live inside provider settings, slash commands, or web dashboards. AI Usage Observatory is a Labs experiment: whether that number deserves a small, permanent place in the macOS menu bar — without becoming another account, backend, or analytics product.
+
+**Codex is the only supported provider today.**
+
+## What it does
+
+The app is a SwiftUI menu bar extra. It does not appear in the Dock.
+
+When a reading is available, the status item shows the **constraining used percent** — the window with the highest provider-reported `usedPercent`, as compact text such as `72%`. Near exhaustion (95% or above, or when the provider marks a limit as reached) the same digits use the system warning color. If there is no reading yet, or the fetch failed, the bar shows a quiet gauge glyph instead of inventing a number.
+
+Opening the popover confirms that glance. It shows:
+
+- Codex, with plan as a subtitle when the provider returns one
+- The same constraining percent
+- Window length and reset time as local clock time (`Resets Thu 14:02`)
+- Additional windows, credits, or `Limit reached` only when those values are actually present
+- When the snapshot was fetched
+- **Refresh** and **Quit**
+
+Failure is explained in the popover, not in the menu bar: not signed in, Codex CLI missing, ChatGPT unreachable, or a generic read failure. Refresh is explicit. The number in the bar is the last successful fetch, not a live ticker.
+
+There is no Observatory account, no Observatory backend, no on-disk usage history, and no login form. Codex remains responsible for authentication.
+
+## How it works
+
+Quota is live provider data. Observatory does not reconstruct remaining allowance from local files.
+
+On launch or Refresh it locates a local Codex CLI (`codex` on `PATH`, then the CLI bundled in ChatGPT.app), starts a **private** `codex app-server --stdio`, and reads ChatGPT-plan rate limits over JSON-RPC. The child process is torn down after the read. Codex continues to own its own login; Observatory does not copy credentials or talk to an Observatory server.
+
+```mermaid
+flowchart LR
+  A[Observatory] --> B[Local Codex CLI]
+  B --> C["Private codex app-server"]
+  C --> D[JSON-RPC over stdio]
+  D --> E[ChatGPT-plan rate limits]
+```
+
+Because the quota lives with the provider, a successful read still needs network access. Offline, the app reports that it cannot reach ChatGPT rather than showing a fabricated meter.
+
+## Status
+
+This is an **experimental Labs prototype**, not a packaged product.
+
+The first implementation milestone exists: a working Codex-only menu bar extra. What has not been decided is whether it earns a permanent place in daily use. The current validation question is:
+
+> Does this utility earn permanent daily use before expanding scope?
+
+Packaging, distribution, background refresh, and other providers are intentionally open. They are not part of this repository’s current promise.
+
+## Privacy
+
+- Observatory does not create or maintain a user account.
+- Observatory does not copy, store, or refresh ChatGPT credentials.
+- Sign-in stays with Codex / ChatGPT, as you already use them.
+- Observatory speaks only to a local Codex app-server it starts itself.
+- Usage numbers are fetched live from the provider. They are not an offline local metric, and they are not persisted. Quitting the app forgets the last snapshot.
+
+## Running a local build
+
+There is no downloadable release yet. The current way to try the app is to build it from source with Xcode.
+
+**Requirements**
+
+- macOS 14 or later
+- Xcode
+- Codex CLI available locally: `codex` on your `PATH`, or [ChatGPT for Mac](https://chatgpt.com/desktop) installed
+- An existing ChatGPT / Codex sign-in (the same one Codex already uses)
+
+**Build and run**
+
+1. Clone this repository.
+2. Open `AIUsageObservatory.xcodeproj` in Xcode.
+3. Run the `AIUsageObservatory` scheme.
+
+The target is an unsandboxed local debug/release build (ad-hoc signing). That is appropriate for a developer prototype; it is not a notarized, Sparkle-updated, or Mac App Store app.
+
+From the command line:
+
+```bash
+xcodebuild -scheme AIUsageObservatory -configuration Debug
+```
+
+If the Codex CLI cannot be found, the popover reports `Codex CLI not found.` If you are not signed in, it asks you to sign in with Codex or ChatGPT — it will not collect a password or token.
+
+## Later exploration
+
+The same kind of local, glanceable surface could later be explored for other AI coding tools (for example Claude Code, Cursor, Gemini, or GitHub Copilot). That is a possibility after Codex daily use is validated, not a committed feature set.
+
+## License
+
+No license file is included in this repository yet.
