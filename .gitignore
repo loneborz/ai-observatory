@@ -1,0 +1,17 @@
+.DS_Store
+DerivedData/
+.derivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+profile
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.xcscmblueprint
