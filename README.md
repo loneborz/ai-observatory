@@ -2,7 +2,7 @@
 
 A lightweight native macOS menu bar utility for viewing current **Codex / ChatGPT plan usage** at a glance.
 
-AI coding limits are useful operational information, but they usually live inside provider settings, slash commands, or web dashboards. AI Usage Observatory is a Labs experiment: whether that number deserves a small, permanent place in the macOS menu bar — without becoming another account, backend, or analytics product.
+AI coding limits are useful operational information, but they usually live inside provider settings, slash commands, or web dashboards. AI Usage Observatory is a Labs experiment: whether that number deserves a small, permanent place in the macOS menu bar, without becoming another account, backend, or analytics product.
 
 **Codex is the only supported provider today.**
 
