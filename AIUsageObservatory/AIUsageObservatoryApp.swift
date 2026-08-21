@@ -46,10 +46,10 @@ private struct MenuBarLabel: View {
         case .percent(let percent, let nearExhaustion):
             Image(nsImage: StatusItemImage.percent(percent, warning: nearExhaustion))
                 .renderingMode(nearExhaustion ? .original : .template)
-                .accessibilityLabel("\(percent)%")
+                .accessibilityLabel("AI Usage Observatory, \(percent)% used")
         case .glyph:
             Image(systemName: "gauge")
-                .accessibilityLabel("Codex usage")
+                .accessibilityLabel("AI Usage Observatory, Codex usage")
         }
     }
 }

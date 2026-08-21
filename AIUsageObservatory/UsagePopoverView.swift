@@ -41,16 +41,21 @@ struct UsagePopoverView: View {
     @ViewBuilder
     private var header: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("Codex")
+            Text("AI Usage Observatory")
                 .font(.headline)
-            if case .available(let snapshot) = presenter.state,
-               let plan = UsageDisplay.planSubtitle(snapshot.planType)
-            {
-                Text(plan)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            Text(providerContext)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
+    }
+
+    private var providerContext: String {
+        guard case .available(let snapshot) = presenter.state,
+              let plan = UsageDisplay.planSubtitle(snapshot.planType)
+        else {
+            return "Codex"
+        }
+        return "Codex · \(plan)"
     }
 
     @ViewBuilder
