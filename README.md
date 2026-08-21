@@ -43,13 +43,13 @@ Because the quota lives with the provider, a successful read still needs network
 
 ## Status
 
-This is an **experimental Labs prototype**, not a packaged product.
+AI Usage Observatory is a **working Codex-only Labs prototype** and has passed its initial daily-use validation.
 
-The first implementation milestone exists: a working Codex-only menu bar extra. What has not been decided is whether it earns a permanent place in daily use. The current validation question is:
+The core interaction is validated in real use: quota stays glanceable in the menu bar and refreshes automatically on a coarse 15-minute cadence, while manual Refresh remains available for an immediate provider read.
 
-> Does this utility earn permanent daily use before expanding scope?
+Post-implementation validation confirmed the full path end to end. A `9%` snapshot fetched at `00:19` automatically advanced to `10%` at `00:34` after real Codex usage, without manual Refresh or relaunch.
 
-Packaging, distribution, and other providers are intentionally open. They are not part of this repository’s current promise.
+The project remains intentionally narrow. Packaging, distribution, and additional providers are open questions rather than current commitments.
 
 ## Privacy
 
@@ -88,7 +88,7 @@ If the Codex CLI cannot be found, the popover reports `Codex CLI not found.` If 
 
 ## Later exploration
 
-The same kind of local, glanceable surface could later be explored for other AI coding tools (for example Claude Code, Cursor, Gemini, or GitHub Copilot). That is a possibility after Codex daily use is validated, not a committed feature set.
+The same kind of local, glanceable surface could later be explored for other AI coding tools (for example Claude Code, Cursor, Gemini, or GitHub Copilot). Those remain possible follow-up directions, not committed scope.
 
 ## License
 
