@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 @MainActor
@@ -5,17 +6,52 @@ final class UsagePresenter: ObservableObject {
     @Published private(set) var state: UsageViewState = .idle
     @Published private(set) var isRefreshing = false
 
+    private enum RefreshTrigger {
+        case launch
+        case popover
+        case manual
+        case automatic
+
+        var isAutomatic: Bool {
+            if case .automatic = self {
+                return true
+            }
+            return false
+        }
+    }
+
     private var lastStarted: Date?
+    private var lastSuccessfulSnapshot: UsageSnapshot?
+    private var refreshSchedule = UsageRefreshSchedule()
+    private var automaticTimer: Timer?
+    private var wakeObserver: NSObjectProtocol?
+    private var hasStarted = false
+
+    init() {
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handleWake()
+            }
+        }
+    }
 
     var menuBarAppearance: MenuBarAppearance {
         UsageDisplay.menuBarAppearance(for: state)
     }
 
     func start() {
+        guard !hasStarted else {
+            return
+        }
+        hasStarted = true
         if applyVerificationSnapshotIfNeeded() {
             return
         }
-        refresh(force: true)
+        refresh(trigger: .launch)
     }
 
     func refreshFromPopover() {
@@ -23,17 +59,17 @@ final class UsagePresenter: ObservableObject {
         // a user opening the popover. After the first completed fetch, ignore it.
         switch state {
         case .idle, .loading:
-            refresh(force: false)
+            refresh(trigger: .popover)
         default:
             return
         }
     }
 
     func refreshNow() {
-        refresh(force: true)
+        refresh(trigger: .manual)
     }
 
-    private func refresh(force: Bool) {
+    private func refresh(trigger: RefreshTrigger) {
         if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
             return
         }
@@ -43,12 +79,22 @@ final class UsagePresenter: ObservableObject {
         if isRefreshing {
             return
         }
-        if !force, let lastStarted, Date().timeIntervalSince(lastStarted) < 3 {
+        if trigger == .popover,
+           let lastStarted,
+           Date().timeIntervalSince(lastStarted) < 3
+        {
             return
         }
 
+        let startedAt = Date()
+        let resetBoundary = trigger.isAutomatic
+            ? refreshSchedule.overdueResetBoundary(in: lastSuccessfulSnapshot, at: startedAt)
+            : nil
+        automaticTimer?.invalidate()
+        automaticTimer = nil
         isRefreshing = true
-        lastStarted = Date()
+        lastStarted = startedAt
+        refreshSchedule.beginAttempt(at: startedAt, handling: resetBoundary)
         if shouldShowFirstLoadCopy {
             state = .loading
         }
@@ -58,18 +104,62 @@ final class UsagePresenter: ObservableObject {
             let result = await CodexUsageClient.fetchSnapshot()
             switch result {
             case .success(let snapshot):
+                lastSuccessfulSnapshot = snapshot
                 state = .available(snapshot)
+                refreshSchedule.recordSuccess(snapshot)
                 let constraining = snapshot.constrainingWindow
                 fputs(
                     "usage-state: available plan=\(snapshot.planType ?? "none") windows=\(snapshot.windows.count) percent=\(constraining?.usedPercent.map(String.init) ?? "none") nearExhaustion=\(snapshot.emphasizesNearExhaustion)\n",
                     stderr
                 )
             case .failure(let failure):
-                state = failure.viewState
+                if !trigger.isAutomatic || lastSuccessfulSnapshot == nil {
+                    state = failure.viewState
+                } else if let lastSuccessfulSnapshot {
+                    state = .available(lastSuccessfulSnapshot)
+                }
                 fputs("usage-state: \(String(describing: failure))\n", stderr)
             }
             isRefreshing = false
+            scheduleAutomaticRefresh()
         }
+    }
+
+    private func handleWake() {
+        guard hasStarted, !applyVerificationSnapshotIfNeeded() else {
+            return
+        }
+        let now = Date()
+        guard refreshSchedule.shouldRefresh(snapshot: lastSuccessfulSnapshot, at: now) else {
+            scheduleAutomaticRefresh()
+            return
+        }
+        refresh(trigger: .automatic)
+    }
+
+    private func automaticTimerDidFire() {
+        automaticTimer = nil
+        guard refreshSchedule.shouldRefresh(snapshot: lastSuccessfulSnapshot, at: Date()) else {
+            scheduleAutomaticRefresh()
+            return
+        }
+        refresh(trigger: .automatic)
+    }
+
+    private func scheduleAutomaticRefresh() {
+        automaticTimer?.invalidate()
+        let now = Date()
+        let nextDate = refreshSchedule.nextDate(snapshot: lastSuccessfulSnapshot, at: now)
+        let timer = Timer(
+            timeInterval: max(0.1, nextDate.timeIntervalSince(now)),
+            repeats: false
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.automaticTimerDidFire()
+            }
+        }
+        automaticTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     private var shouldShowFirstLoadCopy: Bool {

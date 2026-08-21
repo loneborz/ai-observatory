@@ -22,6 +22,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         UsageDisplay.logInvariantCheck()
+#if DEBUG
+        UsageRefreshSchedule.logInvariantCheck()
+#endif
         presenter.start()
 #if DEBUG
         if let path = ProcessInfo.processInfo.environment["AI_USAGE_OBSERVATORY_SCREENSHOT_PATH"] {

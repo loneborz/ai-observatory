@@ -21,7 +21,7 @@ Opening the popover confirms that glance. It shows:
 - When the snapshot was fetched
 - **Refresh** and **Quit**
 
-Failure is explained in the popover, not in the menu bar: not signed in, Codex CLI missing, ChatGPT unreachable, or a generic read failure. Refresh is explicit. The number in the bar is the last successful fetch, not a live ticker.
+Failure is explained in the popover, not in the menu bar: not signed in, Codex CLI missing, ChatGPT unreachable, or a generic read failure. The app refreshes approximately every 15 minutes while awake, with catch-up at wake or a known reset boundary. Manual Refresh remains the explicit path for an immediate read. The number in the bar is the last successful fetch, not a live ticker.
 
 There is no Observatory account, no Observatory backend, no on-disk usage history, and no login form. Codex remains responsible for authentication.
 
@@ -29,7 +29,7 @@ There is no Observatory account, no Observatory backend, no on-disk usage histor
 
 Quota is live provider data. Observatory does not reconstruct remaining allowance from local files.
 
-On launch or Refresh it locates a local Codex CLI (`codex` on `PATH`, then the CLI bundled in ChatGPT.app), starts a **private** `codex app-server --stdio`, and reads ChatGPT-plan rate limits over JSON-RPC. The child process is torn down after the read. Codex continues to own its own login; Observatory does not copy credentials or talk to an Observatory server.
+On launch, on the coarse automatic cadence, or after Refresh it locates a local Codex CLI (`codex` on `PATH`, then the CLI bundled in ChatGPT.app), starts a **private** `codex app-server --stdio`, and reads ChatGPT-plan rate limits over JSON-RPC. The child process is torn down after the read. Codex continues to own its own login; Observatory does not copy credentials or talk to an Observatory server.
 
 ```mermaid
 flowchart LR
@@ -49,7 +49,7 @@ The first implementation milestone exists: a working Codex-only menu bar extra. 
 
 > Does this utility earn permanent daily use before expanding scope?
 
-Packaging, distribution, background refresh, and other providers are intentionally open. They are not part of this repository’s current promise.
+Packaging, distribution, and other providers are intentionally open. They are not part of this repository’s current promise.
 
 ## Privacy
 
