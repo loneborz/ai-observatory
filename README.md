@@ -92,4 +92,4 @@ The same kind of local, glanceable surface could later be explored for other AI 
 
 ## License
 
-No license file is included in this repository yet.
+MIT License; see [LICENSE](LICENSE).
