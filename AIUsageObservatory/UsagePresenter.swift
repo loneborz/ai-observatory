@@ -108,35 +108,30 @@ final class UsagePresenter: ObservableObject {
 extension UsageSnapshot {
     /// Layout-only fixture for verifying the healthy presentation. Not a live quota read.
     static var verificationHealthy: UsageSnapshot {
-        UsageSnapshot(
+        let fetchedAt = Date(timeIntervalSince1970: 1_767_000_000)
+        return UsageSnapshot(
             planType: "plus",
             windows: [
-                UsageWindow(
-                    id: "codex-five-hour",
-                    title: "codex",
-                    usedPercent: 40,
-                    windowDurationMins: 300,
-                    resetsAt: Date().addingTimeInterval(3_600)
-                ),
                 UsageWindow(
                     id: "codex-weekly",
                     title: "codex",
                     usedPercent: 72,
                     windowDurationMins: 10_080,
-                    resetsAt: Date().addingTimeInterval(86_400)
+                    resetsAt: fetchedAt.addingTimeInterval(86_400)
                 ),
             ],
             hasCredits: false,
             creditBalance: "0",
             rateLimitReachedType: nil,
             earnedResetCount: 0,
-            fetchedAt: Date()
+            fetchedAt: fetchedAt
         )
     }
 
     /// Layout-only fixture for verifying near-exhaustion. Matches the LAB-1 99% / null reached-type shape.
     static var verificationExhausted: UsageSnapshot {
-        UsageSnapshot(
+        let fetchedAt = Date(timeIntervalSince1970: 1_767_000_000)
+        return UsageSnapshot(
             planType: "plus",
             windows: [
                 UsageWindow(
@@ -144,14 +139,14 @@ extension UsageSnapshot {
                     title: "codex",
                     usedPercent: 99,
                     windowDurationMins: 10_080,
-                    resetsAt: Date().addingTimeInterval(86_400)
+                    resetsAt: fetchedAt.addingTimeInterval(86_400)
                 )
             ],
             hasCredits: false,
             creditBalance: "0",
             rateLimitReachedType: nil,
             earnedResetCount: 0,
-            fetchedAt: Date()
+            fetchedAt: fetchedAt
         )
     }
 }
