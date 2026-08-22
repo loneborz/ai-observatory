@@ -84,6 +84,17 @@ From the command line:
 xcodebuild -scheme AIUsageObservatory -configuration Debug
 ```
 
+### Build and install for daily use
+
+To build the Release app into the repository's ignored `build/` directory and install it as a normal local macOS application:
+
+```bash
+./scripts/install-app.sh
+open "$HOME/Applications/AI Usage Observatory.app"
+```
+
+The script uses the shared `AIUsageObservatory` scheme and produces `build/Build/Products/Release/AIUsageObservatory.app`, then installs `AI Usage Observatory.app` in `~/Applications`. The installed app is a menu bar accessory, so it does not appear in the Dock. Open its menu bar item to view usage or choose **Refresh**.
+
 If the Codex CLI cannot be found, the popover reports `Codex CLI not found.` If you are not signed in, it asks you to sign in with Codex or ChatGPT — it will not collect a password or token.
 
 ## Later exploration
