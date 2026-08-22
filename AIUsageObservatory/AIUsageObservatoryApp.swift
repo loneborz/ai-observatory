@@ -116,10 +116,11 @@ private enum ScreenshotCapture {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             do {
                 let bounds = hostingView.bounds
+                let captureScale = CGFloat(ProcessInfo.processInfo.environment["AI_USAGE_OBSERVATORY_CAPTURE_SCALE"].flatMap(Double.init) ?? 2)
                 guard let representation = NSBitmapImageRep(
                     bitmapDataPlanes: nil,
-                    pixelsWide: Int(ceil(bounds.width * 2)),
-                    pixelsHigh: Int(ceil(bounds.height * 2)),
+                    pixelsWide: Int(ceil(bounds.width * captureScale)),
+                    pixelsHigh: Int(ceil(bounds.height * captureScale)),
                     bitsPerSample: 8,
                     samplesPerPixel: 4,
                     hasAlpha: true,
