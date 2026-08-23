@@ -2,7 +2,11 @@
 set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-derived_data="$repo_root/build"
+derived_data="$(mktemp -d "${TMPDIR:-/tmp}/ai-usage-observatory-install.XXXXXX")"
+cleanup() {
+  rm -rf -- "$derived_data"
+}
+trap cleanup EXIT HUP INT TERM
 built_app="$derived_data/Build/Products/Release/AIUsageObservatory.app"
 applications_dir="/Applications"
 installed_app="$applications_dir/AI Usage Observatory.app"
