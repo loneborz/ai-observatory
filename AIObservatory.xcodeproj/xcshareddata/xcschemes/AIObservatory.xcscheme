@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2640"
+   LastUpgradeVersion = "2660"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A10000000000000000000002"
-               BuildableName = "AIUsageObservatory.app"
-               BlueprintName = "AIUsageObservatory"
-               ReferencedContainer = "container:AIUsageObservatory.xcodeproj">
+               BuildableName = "AIObservatory.app"
+               BlueprintName = "AIObservatory"
+               ReferencedContainer = "container:AIObservatory.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,9 +44,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A10000000000000000000002"
-            BuildableName = "AIUsageObservatory.app"
-            BlueprintName = "AIUsageObservatory"
-            ReferencedContainer = "container:AIUsageObservatory.xcodeproj">
+            BuildableName = "AIObservatory.app"
+            BlueprintName = "AIObservatory"
+            ReferencedContainer = "container:AIObservatory.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A10000000000000000000002"
-            BuildableName = "AIUsageObservatory.app"
-            BlueprintName = "AIUsageObservatory"
-            ReferencedContainer = "container:AIUsageObservatory.xcodeproj">
+            BuildableName = "AIObservatory.app"
+            BlueprintName = "AIObservatory"
+            ReferencedContainer = "container:AIObservatory.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

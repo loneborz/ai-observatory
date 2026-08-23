@@ -1,14 +1,20 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 struct UsagePopoverView: View {
     @ObservedObject var presenter: UsagePresenter
+    @State private var loginItemStatus = SMAppService.mainApp.status
+    @State private var loginItemError: String?
+    @State private var isUpdatingLoginItem = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
 
             content
+
+            loginItemControl
 
             HStack {
                 // MenuBarExtra window style auto-invokes the first button.
@@ -35,13 +41,69 @@ struct UsagePopoverView: View {
         .frame(width: 280, alignment: .leading)
         .onAppear {
             presenter.refreshFromPopover()
+            refreshLoginItemStatus()
+        }
+    }
+
+    @ViewBuilder
+    private var loginItemControl: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                "Launch at Login",
+                isOn: Binding(
+                    get: { loginItemStatus.isEnabled },
+                    set: { setLoginItem(enabled: $0) }
+                )
+            )
+            .disabled(isUpdatingLoginItem || loginItemStatus.needsApproval)
+
+            Text(loginItemStatus.label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if loginItemStatus.needsApproval {
+                Button("Open Login Items…") {
+                    SMAppService.openSystemSettingsLoginItems()
+                }
+                .font(.caption)
+            }
+
+            if let loginItemError {
+                Text(loginItemError)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func refreshLoginItemStatus() {
+        loginItemStatus = SMAppService.mainApp.status
+    }
+
+    private func setLoginItem(enabled: Bool) {
+        isUpdatingLoginItem = true
+        defer {
+            loginItemStatus = SMAppService.mainApp.status
+            isUpdatingLoginItem = false
+        }
+
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+            loginItemError = nil
+        } catch {
+            loginItemError = "Couldn’t update Launch at Login: \(error.localizedDescription)"
         }
     }
 
     @ViewBuilder
     private var header: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("AI Usage Observatory")
+            Text("AI Observatory")
                 .font(.headline)
             Text(providerContext)
                 .font(.subheadline)
@@ -70,6 +132,37 @@ struct UsagePopoverView: View {
             Text(message)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private extension SMAppService.Status {
+    var isEnabled: Bool {
+        if case .enabled = self {
+            return true
+        }
+        return false
+    }
+
+    var needsApproval: Bool {
+        if case .requiresApproval = self {
+            return true
+        }
+        return false
+    }
+
+    var label: String {
+        switch self {
+        case .enabled:
+            return "Enabled"
+        case .notRegistered:
+            return "Not registered"
+        case .requiresApproval:
+            return "Approval required"
+        case .notFound:
+            return "Unavailable"
+        @unknown default:
+            return "Unavailable"
         }
     }
 }

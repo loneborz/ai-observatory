@@ -4,7 +4,7 @@ import os
 
 enum AppServerProcessHost {
     private static let logger = Logger(
-        subsystem: "nl.wavesweb.AIUsageObservatory",
+        subsystem: "nl.wavesweb.AIObservatory",
         category: "process"
     )
 

@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
-struct AIUsageObservatoryApp: App {
+struct AIObservatoryApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
@@ -27,7 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #endif
         presenter.start()
 #if DEBUG
-        if let path = ProcessInfo.processInfo.environment["AI_USAGE_OBSERVATORY_SCREENSHOT_PATH"] {
+        if let path = ProcessInfo.processInfo.environment["AI_OBSERVATORY_SCREENSHOT_PATH"] {
             screenshotPanel = ScreenshotCapture.start(presenter: presenter, outputPath: path)
         }
 #endif
@@ -46,10 +46,10 @@ private struct MenuBarLabel: View {
         case .percent(let percent, let nearExhaustion):
             Image(nsImage: StatusItemImage.percent(percent, warning: nearExhaustion))
                 .renderingMode(nearExhaustion ? .original : .template)
-                .accessibilityLabel("AI Usage Observatory, \(percent)% used")
+                .accessibilityLabel("AI Observatory, \(percent)% used")
         case .glyph:
             Image(systemName: "gauge")
-                .accessibilityLabel("AI Usage Observatory, Codex usage")
+                .accessibilityLabel("AI Observatory, Codex usage")
         }
     }
 }
@@ -116,7 +116,7 @@ private enum ScreenshotCapture {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             do {
                 let bounds = hostingView.bounds
-                let captureScale = CGFloat(ProcessInfo.processInfo.environment["AI_USAGE_OBSERVATORY_CAPTURE_SCALE"].flatMap(Double.init) ?? 2)
+                let captureScale = CGFloat(ProcessInfo.processInfo.environment["AI_OBSERVATORY_CAPTURE_SCALE"].flatMap(Double.init) ?? 2)
                 guard let representation = NSBitmapImageRep(
                     bitmapDataPlanes: nil,
                     pixelsWide: Int(ceil(bounds.width * captureScale)),

@@ -174,7 +174,7 @@ final class UsagePresenter: ObservableObject {
     @discardableResult
     private func applyVerificationSnapshotIfNeeded() -> Bool {
         #if DEBUG
-        switch ProcessInfo.processInfo.environment["AI_USAGE_OBSERVATORY_SNAPSHOT"] {
+        switch ProcessInfo.processInfo.environment["AI_OBSERVATORY_SNAPSHOT"] {
         case "healthy":
             state = .available(.verificationHealthy)
             isRefreshing = false

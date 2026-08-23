@@ -11,7 +11,7 @@ enum CodexCLILocator {
         environment: [String: String] = ProcessInfo.processInfo.environment,
         fileExists: (URL) -> Bool = { FileManager.default.isExecutableFile(atPath: $0.path) }
     ) -> URL? {
-        if let override = environment["AI_USAGE_OBSERVATORY_CODEX"] {
+        if let override = environment["AI_OBSERVATORY_CODEX"] {
             if override == "missing" {
                 return nil
             }

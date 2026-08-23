@@ -3,19 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXFileReference section */
-		A10000000000000000000003 /* AIUsageObservatory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIUsageObservatory.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000003 /* AIObservatory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIObservatory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A10000000000000000000004 /* AIUsageObservatory */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AIUsageObservatory;
-			sourceTree = "<group>";
-		};
+		A10000000000000000000004 /* AIObservatory */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AIObservatory; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,7 +28,7 @@
 		A10000000000000000000005 = {
 			isa = PBXGroup;
 			children = (
-				A10000000000000000000004 /* AIUsageObservatory */,
+				A10000000000000000000004 /* AIObservatory */,
 				A10000000000000000000006 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +36,7 @@
 		A10000000000000000000006 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A10000000000000000000003 /* AIUsageObservatory.app */,
+				A10000000000000000000003 /* AIObservatory.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +44,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A10000000000000000000002 /* AIUsageObservatory */ = {
+		A10000000000000000000002 /* AIObservatory */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A10000000000000000000011 /* Build configuration list for PBXNativeTarget "AIUsageObservatory" */;
+			buildConfigurationList = A10000000000000000000011 /* Build configuration list for PBXNativeTarget "AIObservatory" */;
 			buildPhases = (
 				A10000000000000000000007 /* Sources */,
 				A10000000000000000000008 /* Frameworks */,
@@ -61,11 +57,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A10000000000000000000004 /* AIUsageObservatory */,
+				A10000000000000000000004 /* AIObservatory */,
 			);
-			name = AIUsageObservatory;
-			productName = AIUsageObservatory;
-			productReference = A10000000000000000000003 /* AIUsageObservatory.app */;
+			name = AIObservatory;
+			productName = AIObservatory;
+			productReference = A10000000000000000000003 /* AIObservatory.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -76,14 +72,15 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2640;
-				LastUpgradeCheck = 2640;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					A10000000000000000000002 = {
 						CreatedOnToolsVersion = 26.4;
 					};
 				};
 			};
-			buildConfigurationList = A10000000000000000000010 /* Build configuration list for PBXProject "AIUsageObservatory" */;
+			buildConfigurationList = A10000000000000000000010 /* Build configuration list for PBXProject "AIObservatory" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -95,7 +92,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A10000000000000000000002 /* AIUsageObservatory */,
+				A10000000000000000000002 /* AIObservatory */,
 			);
 		};
 /* End PBXProject section */
@@ -155,9 +152,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -178,6 +177,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -217,9 +217,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -233,6 +235,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -246,10 +249,11 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Usage Observatory";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Observatory";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -260,7 +264,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.wavesweb.AIUsageObservatory;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.wavesweb.AIObservatory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -279,10 +283,11 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Usage Observatory";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Observatory";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -293,7 +298,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.wavesweb.AIUsageObservatory;
+				PRODUCT_BUNDLE_IDENTIFIER = nl.wavesweb.AIObservatory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -306,7 +311,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A10000000000000000000010 /* Build configuration list for PBXProject "AIUsageObservatory" */ = {
+		A10000000000000000000010 /* Build configuration list for PBXProject "AIObservatory" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A10000000000000000000012 /* Debug */,
@@ -315,7 +320,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		A10000000000000000000011 /* Build configuration list for PBXNativeTarget "AIUsageObservatory" */ = {
+		A10000000000000000000011 /* Build configuration list for PBXNativeTarget "AIObservatory" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A10000000000000000000014 /* Debug */,
