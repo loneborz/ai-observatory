@@ -2,15 +2,15 @@
 set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-derived_data="$(mktemp -d "${TMPDIR:-/tmp}/ai-usage-observatory-install.XXXXXX")"
+derived_data="$(mktemp -d "${TMPDIR:-/tmp}/ai-observatory-install.XXXXXX")"
 cleanup() {
   rm -rf -- "$derived_data"
 }
 trap cleanup EXIT HUP INT TERM
-built_app="$derived_data/Build/Products/Release/AIUsageObservatory.app"
+built_app="$derived_data/Build/Products/Release/AIObservatory.app"
 applications_dir="/Applications"
-installed_app="$applications_dir/AI Usage Observatory.app"
-legacy_app="${HOME}/Applications/AI Usage Observatory.app"
+installed_app="$applications_dir/AI Observatory.app"
+legacy_app="$applications_dir/AI Usage Observatory.app"
 legacy_executable="$legacy_app/Contents/MacOS/AIUsageObservatory"
 
 find_legacy_pids() {
@@ -18,8 +18,8 @@ find_legacy_pids() {
 }
 
 xcodebuild \
-  -project "$repo_root/AIUsageObservatory.xcodeproj" \
-  -scheme AIUsageObservatory \
+  -project "$repo_root/AIObservatory.xcodeproj" \
+  -scheme AIObservatory \
   -configuration Release \
   -derivedDataPath "$derived_data" \
   build
@@ -70,7 +70,11 @@ if [ -d "$legacy_app" ]; then
       exit 1
     fi
   fi
-  rm -rf "$legacy_app"
+  if [ -w "$applications_dir" ]; then
+    rm -rf "$legacy_app"
+  else
+    sudo rm -rf "$legacy_app"
+  fi
 fi
 
 echo "Built:     $built_app"

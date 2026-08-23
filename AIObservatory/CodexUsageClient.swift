@@ -3,7 +3,7 @@ import os
 
 enum CodexUsageClient {
     private static let logger = Logger(
-        subsystem: "nl.wavesweb.AIUsageObservatory",
+        subsystem: "nl.wavesweb.AIObservatory",
         category: "usage"
     )
 
@@ -39,8 +39,8 @@ enum CodexUsageClient {
             "initialize",
             params: [
                 "clientInfo": [
-                    "name": "ai-usage-observatory",
-                    "title": "AI Usage Observatory",
+                    "name": "ai-observatory",
+                    "title": "AI Observatory",
                     "version": "0.1.0",
                 ],
                 "capabilities": [

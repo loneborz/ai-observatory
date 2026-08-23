@@ -1,8 +1,8 @@
-# AI Usage Observatory
+# AI Observatory
 
 A lightweight native macOS menu bar utility for viewing current **Codex / ChatGPT plan usage** at a glance.
 
-AI coding limits are useful operational information, but they usually live inside provider settings, slash commands, or web dashboards. AI Usage Observatory is a Labs experiment: whether that number deserves a small, permanent place in the macOS menu bar, without becoming another account, backend, or analytics product.
+AI coding limits are useful operational information, but they usually live inside provider settings, slash commands, or web dashboards. AI Observatory is a Labs experiment: whether that number deserves a small, permanent place in the macOS menu bar, without becoming another account, backend, or analytics product.
 
 **Codex is the only supported provider today.**
 
@@ -44,7 +44,7 @@ Because the quota lives with the provider, a successful read still needs network
 
 ## Status
 
-AI Usage Observatory is a **working Codex-only Labs prototype** and has passed its initial daily-use validation.
+AI Observatory is a **working Codex-only Labs prototype** and has passed its initial daily-use validation.
 
 The core interaction is validated in real use: quota stays glanceable in the menu bar and refreshes automatically on a coarse 15-minute cadence, while manual Refresh remains available for an immediate provider read.
 
@@ -76,15 +76,15 @@ There is no downloadable release yet. The current way to try the app is to build
 **Build and run**
 
 1. Clone this repository.
-2. Open `AIUsageObservatory.xcodeproj` in Xcode.
-3. Run the `AIUsageObservatory` scheme.
+2. Open `AIObservatory.xcodeproj` in Xcode.
+3. Run the `AIObservatory` scheme.
 
 The target is an unsandboxed local debug/release build (ad-hoc signing). That is appropriate for a developer prototype; it is not a notarized, Sparkle-updated, or Mac App Store app.
 
 From the command line:
 
 ```bash
-xcodebuild -scheme AIUsageObservatory -configuration Debug
+xcodebuild -scheme AIObservatory -configuration Debug
 ```
 
 ### Build and install for daily use
@@ -93,10 +93,10 @@ To build the Release app into the repository's ignored `build/` directory and in
 
 ```bash
 ./scripts/install-app.sh
-open "/Applications/AI Usage Observatory.app"
+open "/Applications/AI Observatory.app"
 ```
 
-The script uses the shared `AIUsageObservatory` scheme and produces `build/Build/Products/Release/AIUsageObservatory.app`, then installs `AI Usage Observatory.app` in `/Applications`. If `/Applications` is not writable by your user, the script requests `sudo` only for the install replacement. After the new bundle is verified, it removes the exact legacy `~/Applications/AI Usage Observatory.app` copy; if that copy is running, the script requests a clean quit and stops for manual action if it does not exit. The installed app is a menu bar accessory, so it does not appear in the Dock. Open its menu bar item to view usage or choose **Refresh**.
+The script uses the shared `AIObservatory` scheme and builds into unique temporary DerivedData, so no repository-local `.app` build product is required. It installs `AI Observatory.app` in `/Applications`. If `/Applications` is not writable by your user, the script requests `sudo` only for the install replacement or removal of the old app. After the new bundle is verified, it removes the exact legacy `/Applications/AI Usage Observatory.app` copy; if that copy is running, the script requests a clean quit and stops for manual action if it does not exit. The installed app is a menu bar accessory, so it does not appear in the Dock. Open its menu bar item to view usage or choose **Refresh**.
 
 If the Codex CLI cannot be found, the popover reports `Codex CLI not found.` If you are not signed in, it asks you to sign in with Codex or ChatGPT — it will not collect a password or token.
 
@@ -108,4 +108,4 @@ The same kind of local, glanceable surface could later be explored for other AI 
 
 MIT License; see [LICENSE](LICENSE).
 
-The source code is licensed under the MIT License. The AI Usage Observatory application icon, source artwork, and generated icon derivatives are excluded from that software license and are not separately licensed for reuse.
+The source code is licensed under the MIT License. The AI Observatory application icon, source artwork, and generated icon derivatives are excluded from that software license and are not separately licensed for reuse.

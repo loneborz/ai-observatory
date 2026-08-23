@@ -9,7 +9,7 @@ struct JSONRPCError: Error {
 final class JSONRPCSession: @unchecked Sendable {
     private let input: FileHandle
     private let output: FileHandle
-    private let queue = DispatchQueue(label: "nl.wavesweb.AIUsageObservatory.rpc")
+    private let queue = DispatchQueue(label: "nl.wavesweb.AIObservatory.rpc")
     private var buffer = Data()
     private var queuedLines: [String] = []
     private var waiters: [CheckedContinuation<String?, Error>] = []

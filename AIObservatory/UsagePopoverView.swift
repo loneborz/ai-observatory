@@ -103,7 +103,7 @@ struct UsagePopoverView: View {
     @ViewBuilder
     private var header: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("AI Usage Observatory")
+            Text("AI Observatory")
                 .font(.headline)
             Text(providerContext)
                 .font(.subheadline)
