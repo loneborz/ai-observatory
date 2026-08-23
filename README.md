@@ -19,6 +19,7 @@ Opening the popover confirms that glance. It shows:
 - Window length and reset time as local clock time (`Resets Thu 14:02`)
 - Additional windows, credits, or `Limit reached` only when those values are actually present
 - When the snapshot was fetched
+- Optional **Launch at Login**, backed by macOS ServiceManagement and reflected from the system registration state
 - **Refresh** and **Quit**
 
 Failure is explained in the popover, not in the menu bar: not signed in, Codex CLI missing, ChatGPT unreachable, or a generic read failure. The app refreshes approximately every 15 minutes while awake, with catch-up at wake or a known reset boundary. Manual Refresh remains the explicit path for an immediate read. The number in the bar is the last successful fetch, not a live ticker.
@@ -50,6 +51,8 @@ The core interaction is validated in real use: quota stays glanceable in the men
 Post-implementation validation confirmed the full path end to end. A `9%` snapshot fetched at `00:19` automatically advanced to `10%` at `00:34` after real Codex usage, without manual Refresh or relaunch.
 
 The project remains intentionally narrow. Packaging, distribution, and additional providers are open questions rather than current commitments.
+
+Use **Launch at Login** in the popover to register the installed app for future user logins. The control reflects macOS ServiceManagement state; if macOS requires approval, use the provided Login Items link in the popover.
 
 ## Privacy
 
