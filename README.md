@@ -107,3 +107,5 @@ The same kind of local, glanceable surface could later be explored for other AI 
 ## License
 
 MIT License; see [LICENSE](LICENSE).
+
+The source code is licensed under the MIT License. The AI Usage Observatory application icon, source artwork, and generated icon derivatives are excluded from that software license and are not separately licensed for reuse.
