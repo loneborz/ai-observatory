@@ -10,13 +10,13 @@ AI coding limits are useful operational information, but they usually live insid
 
 The app is a SwiftUI menu bar extra. It does not appear in the Dock.
 
-When a reading is available, the status item shows the **constraining remaining percent** from the window with the highest provider-reported `usedPercent`, as compact text such as `28%`. Near exhaustion is still determined by the source used percent reaching 95% or by the provider marking a limit as reached; the remaining digits use the system warning color. If there is no reading yet, or the fetch failed, the bar shows a quiet gauge glyph instead of inventing a number.
+When a reading is available, the status item shows the available 5-hour and 7-day **remaining percentages** as a compact two-line readout, with 5H above 7D. If only one of those windows is available, it shows only that real window. Near exhaustion is determined per window by source usage reaching 95%; a provider reached-state still warns the constraining window. The affected remaining digits use the system warning color. If there is no reading yet, or the fetch failed, the bar shows a quiet gauge glyph instead of inventing a number.
 
 Opening the popover confirms that glance. It shows:
 
 - Codex, with plan as a subtitle when the provider returns one
-- The same constraining remaining percent, with a quiet **Remaining** cue
-- Window length and reset time as local clock time (`Resets Thu 14:02`)
+- The 5-hour and 7-day remaining percentages as co-primary compact blocks, with a quiet **Remaining** cue on each
+- Each window's length and reset time as local clock time (`Resets Thu 14:02`)
 - Additional windows with remaining percentages, credits, or `Limit reached` only when those values are actually present
 - When the snapshot was fetched
 - Optional **Launch at Login**, backed by macOS ServiceManagement and reflected from the system registration state

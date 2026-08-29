@@ -1,12 +1,20 @@
 import Foundation
 
+struct MenuBarQuota: Equatable {
+    let remainingPercent: Int
+    let shortLabel: String
+    let nearExhaustion: Bool
+}
+
 enum MenuBarAppearance: Equatable {
-    case percent(Int, nearExhaustion: Bool)
+    case quotas([MenuBarQuota])
     case glyph
 }
 
 enum UsageDisplay {
     static let nearExhaustionPercent = 95
+    static let fiveHourWindowDurationMins = 300
+    static let sevenDayWindowDurationMins = 10_080
 
     static func remainingPercent(for usedPercent: Int?) -> Int? {
         guard let usedPercent else {
@@ -31,46 +39,79 @@ enum UsageDisplay {
             }
     }
 
-    static func additionalWindows(in windows: [UsageWindow]) -> [UsageWindow] {
-        guard let constraining = constrainingWindow(in: windows) else {
-            return windows
+    static func primaryQuotaWindows(in windows: [UsageWindow]) -> [UsageWindow] {
+        let available = windows.filter { $0.usedPercent != nil }
+        let fiveHour = preferredWindow(withDuration: fiveHourWindowDurationMins, in: available)
+        let sevenDay = preferredWindow(withDuration: sevenDayWindowDurationMins, in: available)
+        let identified = [fiveHour, sevenDay].compactMap { $0 }
+
+        if !identified.isEmpty {
+            return identified
         }
-        return windows.filter { $0.id != constraining.id }
+        return constrainingWindow(in: available).map { [$0] } ?? []
+    }
+
+    static func additionalWindows(in windows: [UsageWindow], excluding displayedWindows: [UsageWindow]) -> [UsageWindow] {
+        let displayedIDs = Set(displayedWindows.map(\.id))
+        return windows.filter { !displayedIDs.contains($0.id) }
     }
 
     static func menuBarAppearance(for state: UsageViewState) -> MenuBarAppearance {
-        guard case .available(let snapshot) = state,
-              let percent = snapshot.constrainingRemainingPercent
-        else {
+        guard case .available(let snapshot) = state else {
             return .glyph
         }
-        return .percent(percent, nearExhaustion: snapshot.emphasizesNearExhaustion)
+
+        let quotas = primaryQuotaWindows(in: snapshot.windows).compactMap { window -> MenuBarQuota? in
+            guard let remainingPercent = remainingPercent(for: window.usedPercent) else {
+                return nil
+            }
+            return MenuBarQuota(
+                remainingPercent: remainingPercent,
+                shortLabel: compactWindowLabel(window),
+                nearExhaustion: snapshot.emphasizesNearExhaustion(for: window)
+            )
+        }
+
+        guard !quotas.isEmpty else {
+            return .glyph
+        }
+        return .quotas(quotas)
     }
 
-    static func showsCredits(hasCredits: Bool?, balance: String?) -> Bool {
-        if hasCredits == true {
+    static func isNearExhaustion(
+        for window: UsageWindow,
+        constrainingWindow: UsageWindow?,
+        reachedType: String?
+    ) -> Bool {
+        guard let usedPercent = window.usedPercent else {
+            return false
+        }
+        if usedPercent >= nearExhaustionPercent {
             return true
         }
-        guard let balance else {
-            return false
-        }
-        let trimmed = balance.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmed.isEmpty && trimmed != "0"
+        return window.id == constrainingWindow?.id && showsLimitReached(reachedType)
     }
 
-    static func showsLimitReached(_ reachedType: String?) -> Bool {
-        guard let reachedType else {
-            return false
+    static func compactWindowLabel(_ window: UsageWindow) -> String {
+        if let minutes = window.windowDurationMins {
+            if minutes == fiveHourWindowDurationMins {
+                return "5H"
+            }
+            if minutes == sevenDayWindowDurationMins {
+                return "7D"
+            }
+            let day = 60 * 24
+            if minutes >= day, minutes % day == 0 {
+                return "\(minutes / day)D"
+            }
+            if minutes >= 60, minutes % 60 == 0 {
+                return "\(minutes / 60)H"
+            }
+            return "\(minutes)M"
         }
-        return !reachedType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
 
-    static func planSubtitle(_ planType: String?) -> String? {
-        guard let planType else {
-            return nil
-        }
-        let trimmed = planType.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed.localizedCapitalized
+        let title = window.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return title.isEmpty ? "Quota" : String(title.prefix(5)).uppercased()
     }
 
     static func windowLabel(_ window: UsageWindow) -> String {
@@ -99,6 +140,32 @@ enum UsageDisplay {
         return trimmed.isEmpty ? nil : trimmed
     }
 
+    static func showsCredits(hasCredits: Bool?, balance: String?) -> Bool {
+        if hasCredits == true {
+            return true
+        }
+        guard let balance else {
+            return false
+        }
+        let trimmed = balance.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !trimmed.isEmpty && trimmed != "0"
+    }
+
+    static func showsLimitReached(_ reachedType: String?) -> Bool {
+        guard let reachedType else {
+            return false
+        }
+        return !reachedType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    static func planSubtitle(_ planType: String?) -> String? {
+        guard let planType else {
+            return nil
+        }
+        let trimmed = planType.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed.localizedCapitalized
+    }
+
     static func logInvariantCheck() {
         let weekly = UsageWindow(id: "weekly", title: "codex", usedPercent: 72, windowDurationMins: 10_080, resetsAt: nil)
         let fiveHour = UsageWindow(id: "five", title: "codex", usedPercent: 40, windowDurationMins: 300, resetsAt: nil)
@@ -113,29 +180,79 @@ enum UsageDisplay {
         check("shorter-duration-on-tie", constrainingWindow(in: [weekly, tiedFive])?.id == "tied-five")
         check("ignore-missing-percent", constrainingWindow(in: [unlabeled, fiveHour])?.id == "five")
         check("no-invented-zero", constrainingWindow(in: [unlabeled]) == nil)
-        check("remaining-conversion", remainingPercent(for: 72) == 28)
+        check("remaining-5h", remainingPercent(for: fiveHour.usedPercent) == 60)
+        check("remaining-7d", remainingPercent(for: weekly.usedPercent) == 28)
+        check("remaining-renders-0", remainingPercent(for: 100) == 0)
+        check("remaining-renders-9", remainingPercent(for: 91) == 9)
+        check("remaining-renders-10", remainingPercent(for: 90) == 10)
+        check("remaining-renders-99", remainingPercent(for: 1) == 99)
+        check("remaining-renders-100", remainingPercent(for: 0) == 100)
         check("remaining-clamps-low", remainingPercent(for: 105) == 0)
         check("remaining-clamps-high", remainingPercent(for: -5) == 100)
         check("remaining-preserves-missing", remainingPercent(for: nil) == nil)
         check(
-            "healthy-below-95",
-            menuBarAppearance(for: .available(snapshot(percent: 94, reached: nil))) == .percent(6, nearExhaustion: false)
+            "window-identification-ignores-payload-order",
+            primaryQuotaWindows(in: [weekly, fiveHour]).map(\.id) == ["five", "weekly"]
         )
         check(
-            "exhausted-at-95",
-            menuBarAppearance(for: .available(snapshot(percent: 95, reached: nil))) == .percent(5, nearExhaustion: true)
+            "both-window-rendering-state",
+            menuBarAppearance(for: .available(snapshot(windows: [weekly, fiveHour], reached: nil))) == .quotas([
+                MenuBarQuota(remainingPercent: 60, shortLabel: "5H", nearExhaustion: false),
+                MenuBarQuota(remainingPercent: 28, shortLabel: "7D", nearExhaustion: false),
+            ])
         )
         check(
-            "exhausted-reached-type",
-            menuBarAppearance(for: .available(snapshot(percent: 10, reached: "primary"))) == .percent(90, nearExhaustion: true)
+            "5h-only-rendering-state",
+            menuBarAppearance(for: .available(snapshot(windows: [fiveHour], reached: nil))) == .quotas([
+                MenuBarQuota(remainingPercent: 60, shortLabel: "5H", nearExhaustion: false),
+            ])
         )
         check(
-            "constraining-window-uses-used-pressure",
-            menuBarAppearance(for: .available(snapshot(windows: [weekly, fiveHour], reached: nil))) == .percent(28, nearExhaustion: false)
+            "7d-only-rendering-state",
+            menuBarAppearance(for: .available(snapshot(windows: [weekly], reached: nil))) == .quotas([
+                MenuBarQuota(remainingPercent: 28, shortLabel: "7D", nearExhaustion: false),
+            ])
         )
-        check("glyph-without-percent", menuBarAppearance(for: .available(snapshot(percent: nil, reached: nil))) == .glyph)
+        let warningFiveHour = UsageWindow(id: "warning-five", title: "codex", usedPercent: 95, windowDurationMins: 300, resetsAt: nil)
+        let healthyWeekly = UsageWindow(id: "healthy-weekly", title: "codex", usedPercent: 50, windowDurationMins: 10_080, resetsAt: nil)
+        check(
+            "independent-warning-boundaries",
+            menuBarAppearance(for: .available(snapshot(windows: [healthyWeekly, warningFiveHour], reached: nil))) == .quotas([
+                MenuBarQuota(remainingPercent: 5, shortLabel: "5H", nearExhaustion: true),
+                MenuBarQuota(remainingPercent: 50, shortLabel: "7D", nearExhaustion: false),
+            ])
+        )
+        let healthyFiveHour = UsageWindow(id: "healthy-five", title: "codex", usedPercent: 50, windowDurationMins: 300, resetsAt: nil)
+        let warningWeekly = UsageWindow(id: "warning-weekly", title: "codex", usedPercent: 95, windowDurationMins: 10_080, resetsAt: nil)
+        check(
+            "independent-warning-boundaries-reversed",
+            menuBarAppearance(for: .available(snapshot(windows: [warningWeekly, healthyFiveHour], reached: nil))) == .quotas([
+                MenuBarQuota(remainingPercent: 50, shortLabel: "5H", nearExhaustion: false),
+                MenuBarQuota(remainingPercent: 5, shortLabel: "7D", nearExhaustion: true),
+            ])
+        )
+        check(
+            "reached-type-still-warns-constraining-window",
+            menuBarAppearance(for: .available(snapshot(percent: 10, reached: "primary"))) == .quotas([
+                MenuBarQuota(remainingPercent: 90, shortLabel: "7D", nearExhaustion: true),
+            ])
+        )
+        check("missing-percentage-state", menuBarAppearance(for: .available(snapshot(percent: nil, reached: nil))) == .glyph)
         check("glyph-on-error", menuBarAppearance(for: .error("Failed to read usage. Refresh later.")) == .glyph)
         check("hide-empty-credits", !showsCredits(hasCredits: false, balance: "0"))
+    }
+
+    private static func preferredWindow(withDuration duration: Int, in windows: [UsageWindow]) -> UsageWindow? {
+        windows
+            .filter { $0.windowDurationMins == duration }
+            .max { lhs, rhs in
+                let leftPercent = lhs.usedPercent ?? Int.min
+                let rightPercent = rhs.usedPercent ?? Int.min
+                if leftPercent != rightPercent {
+                    return leftPercent < rightPercent
+                }
+                return lhs.id > rhs.id
+            }
     }
 
     private static func snapshot(percent: Int?, reached: String?) -> UsageSnapshot {
@@ -200,8 +317,12 @@ extension UsageSnapshot {
         UsageDisplay.remainingPercent(for: constrainingUsedPercent)
     }
 
+    var primaryQuotaWindows: [UsageWindow] {
+        UsageDisplay.primaryQuotaWindows(in: windows)
+    }
+
     var additionalWindows: [UsageWindow] {
-        UsageDisplay.additionalWindows(in: windows)
+        UsageDisplay.additionalWindows(in: windows, excluding: primaryQuotaWindows)
     }
 
     var isNearExhaustion: Bool {
@@ -216,7 +337,18 @@ extension UsageSnapshot {
 
     /// Warning color is only for a real percent under quota stress, never for the empty glyph.
     var emphasizesNearExhaustion: Bool {
-        constrainingUsedPercent != nil && isNearExhaustion
+        guard let constrainingWindow else {
+            return false
+        }
+        return emphasizesNearExhaustion(for: constrainingWindow)
+    }
+
+    func emphasizesNearExhaustion(for window: UsageWindow) -> Bool {
+        UsageDisplay.isNearExhaustion(
+            for: window,
+            constrainingWindow: constrainingWindow,
+            reachedType: rateLimitReachedType
+        )
     }
 
     var showsCredits: Bool {

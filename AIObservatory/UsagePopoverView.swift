@@ -172,25 +172,16 @@ private struct AvailableUsageView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let percent = snapshot.constrainingRemainingPercent {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(percent)%")
-                        .font(.system(size: 28, weight: .regular).monospacedDigit())
-                        .foregroundStyle(percentColor)
-                    Text("Remaining")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            if let window = snapshot.constrainingWindow {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(UsageDisplay.windowLabel(window))
-                    if let reset = UsageDisplay.resetPhrase(window.resetsAt) {
-                        Text(reset)
+            if !snapshot.primaryQuotaWindows.isEmpty {
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(snapshot.primaryQuotaWindows) { window in
+                        QuotaBlock(
+                            window: window,
+                            emphasized: window.windowDurationMins == UsageDisplay.fiveHourWindowDurationMins,
+                            nearExhaustion: snapshot.emphasizesNearExhaustion(for: window)
+                        )
                     }
                 }
-                .foregroundStyle(.secondary)
             }
 
             ForEach(snapshot.additionalWindows) { window in
@@ -210,10 +201,6 @@ private struct AvailableUsageView: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
-    }
-
-    private var percentColor: Color {
-        snapshot.emphasizesNearExhaustion ? Color(nsColor: .systemOrange) : Color.primary
     }
 
     private var creditsRow: some View {
@@ -243,6 +230,58 @@ private struct AvailableUsageView: View {
             }
         }
         .font(.subheadline)
-        .foregroundStyle(.tertiary)
+        .foregroundStyle(
+            snapshot.emphasizesNearExhaustion(for: window)
+                ? Color(nsColor: .systemOrange)
+                : Color.secondary.opacity(0.8)
+        )
+    }
+}
+
+private struct QuotaBlock: View {
+    let window: UsageWindow
+    let emphasized: Bool
+    let nearExhaustion: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                if let percent = UsageDisplay.remainingPercent(for: window.usedPercent) {
+                    Text("\(percent)%")
+                        .font(
+                            .system(
+                                size: emphasized ? 24 : 22,
+                                weight: emphasized ? .medium : .regular
+                            )
+                            .monospacedDigit()
+                        )
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
+                        .foregroundStyle(
+                            nearExhaustion
+                                ? Color(nsColor: .systemOrange)
+                                : Color.primary
+                        )
+                }
+                Text("Remaining")
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .allowsTightening(true)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text(UsageDisplay.windowLabel(window))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            if let reset = UsageDisplay.resetPhrase(window.resetsAt) {
+                Text(reset)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
