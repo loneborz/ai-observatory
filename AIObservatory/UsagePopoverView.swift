@@ -172,10 +172,15 @@ private struct AvailableUsageView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let percent = snapshot.constrainingUsedPercent {
-                Text("\(percent)%")
-                    .font(.system(size: 28, weight: .regular).monospacedDigit())
-                    .foregroundStyle(percentColor)
+            if let percent = snapshot.constrainingRemainingPercent {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\(percent)%")
+                        .font(.system(size: 28, weight: .regular).monospacedDigit())
+                        .foregroundStyle(percentColor)
+                    Text("Remaining")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             if let window = snapshot.constrainingWindow {
@@ -227,7 +232,7 @@ private struct AvailableUsageView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(UsageDisplay.windowLabel(window))
                 Spacer()
-                if let percent = window.usedPercent {
+                if let percent = UsageDisplay.remainingPercent(for: window.usedPercent) {
                     Text("\(percent)%")
                         .monospacedDigit()
                 }
