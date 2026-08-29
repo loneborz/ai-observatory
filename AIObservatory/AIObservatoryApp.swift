@@ -131,7 +131,6 @@ private struct ScreenshotSurface: View {
                 .stroke(Color.white.opacity(0.24), lineWidth: 0.8)
         }
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: .black.opacity(0.5), radius: 14, y: 6)
         .padding(24)
         .fixedSize()
     }
