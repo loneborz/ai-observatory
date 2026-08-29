@@ -8,6 +8,14 @@ enum MenuBarAppearance: Equatable {
 enum UsageDisplay {
     static let nearExhaustionPercent = 95
 
+    static func remainingPercent(for usedPercent: Int?) -> Int? {
+        guard let usedPercent else {
+            return nil
+        }
+        let clampedUsedPercent = min(max(usedPercent, 0), 100)
+        return 100 - clampedUsedPercent
+    }
+
     static func constrainingWindow(in windows: [UsageWindow]) -> UsageWindow? {
         windows
             .filter { $0.usedPercent != nil }
@@ -32,7 +40,7 @@ enum UsageDisplay {
 
     static func menuBarAppearance(for state: UsageViewState) -> MenuBarAppearance {
         guard case .available(let snapshot) = state,
-              let percent = snapshot.constrainingUsedPercent
+              let percent = snapshot.constrainingRemainingPercent
         else {
             return .glyph
         }
@@ -105,17 +113,25 @@ enum UsageDisplay {
         check("shorter-duration-on-tie", constrainingWindow(in: [weekly, tiedFive])?.id == "tied-five")
         check("ignore-missing-percent", constrainingWindow(in: [unlabeled, fiveHour])?.id == "five")
         check("no-invented-zero", constrainingWindow(in: [unlabeled]) == nil)
+        check("remaining-conversion", remainingPercent(for: 72) == 28)
+        check("remaining-clamps-low", remainingPercent(for: 105) == 0)
+        check("remaining-clamps-high", remainingPercent(for: -5) == 100)
+        check("remaining-preserves-missing", remainingPercent(for: nil) == nil)
         check(
             "healthy-below-95",
-            menuBarAppearance(for: .available(snapshot(percent: 94, reached: nil))) == .percent(94, nearExhaustion: false)
+            menuBarAppearance(for: .available(snapshot(percent: 94, reached: nil))) == .percent(6, nearExhaustion: false)
         )
         check(
             "exhausted-at-95",
-            menuBarAppearance(for: .available(snapshot(percent: 95, reached: nil))) == .percent(95, nearExhaustion: true)
+            menuBarAppearance(for: .available(snapshot(percent: 95, reached: nil))) == .percent(5, nearExhaustion: true)
         )
         check(
             "exhausted-reached-type",
-            menuBarAppearance(for: .available(snapshot(percent: 10, reached: "primary"))) == .percent(10, nearExhaustion: true)
+            menuBarAppearance(for: .available(snapshot(percent: 10, reached: "primary"))) == .percent(90, nearExhaustion: true)
+        )
+        check(
+            "constraining-window-uses-used-pressure",
+            menuBarAppearance(for: .available(snapshot(windows: [weekly, fiveHour], reached: nil))) == .percent(28, nearExhaustion: false)
         )
         check("glyph-without-percent", menuBarAppearance(for: .available(snapshot(percent: nil, reached: nil))) == .glyph)
         check("glyph-on-error", menuBarAppearance(for: .error("Failed to read usage. Refresh later.")) == .glyph)
@@ -123,11 +139,18 @@ enum UsageDisplay {
     }
 
     private static func snapshot(percent: Int?, reached: String?) -> UsageSnapshot {
-        UsageSnapshot(
-            planType: "plus",
+        snapshot(
             windows: [
                 UsageWindow(id: "codex", title: "codex", usedPercent: percent, windowDurationMins: 10_080, resetsAt: nil)
             ],
+            reached: reached
+        )
+    }
+
+    private static func snapshot(windows: [UsageWindow], reached: String?) -> UsageSnapshot {
+        UsageSnapshot(
+            planType: "plus",
+            windows: windows,
             hasCredits: false,
             creditBalance: "0",
             rateLimitReachedType: reached,
@@ -171,6 +194,10 @@ extension UsageSnapshot {
 
     var constrainingUsedPercent: Int? {
         constrainingWindow?.usedPercent
+    }
+
+    var constrainingRemainingPercent: Int? {
+        UsageDisplay.remainingPercent(for: constrainingUsedPercent)
     }
 
     var additionalWindows: [UsageWindow] {

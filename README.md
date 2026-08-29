@@ -10,14 +10,14 @@ AI coding limits are useful operational information, but they usually live insid
 
 The app is a SwiftUI menu bar extra. It does not appear in the Dock.
 
-When a reading is available, the status item shows the **constraining used percent** — the window with the highest provider-reported `usedPercent`, as compact text such as `72%`. Near exhaustion (95% or above, or when the provider marks a limit as reached) the same digits use the system warning color. If there is no reading yet, or the fetch failed, the bar shows a quiet gauge glyph instead of inventing a number.
+When a reading is available, the status item shows the **constraining remaining percent** from the window with the highest provider-reported `usedPercent`, as compact text such as `28%`. Near exhaustion is still determined by the source used percent reaching 95% or by the provider marking a limit as reached; the remaining digits use the system warning color. If there is no reading yet, or the fetch failed, the bar shows a quiet gauge glyph instead of inventing a number.
 
 Opening the popover confirms that glance. It shows:
 
 - Codex, with plan as a subtitle when the provider returns one
-- The same constraining percent
+- The same constraining remaining percent, with a quiet **Remaining** cue
 - Window length and reset time as local clock time (`Resets Thu 14:02`)
-- Additional windows, credits, or `Limit reached` only when those values are actually present
+- Additional windows with remaining percentages, credits, or `Limit reached` only when those values are actually present
 - When the snapshot was fetched
 - Optional **Launch at Login**, backed by macOS ServiceManagement and reflected from the system registration state
 - **Refresh** and **Quit**
@@ -28,7 +28,7 @@ There is no Observatory account, no Observatory backend, no on-disk usage histor
 
 ## How it works
 
-Quota is live provider data. Observatory does not reconstruct remaining allowance from local files.
+Quota is live provider data. Observatory does not reconstruct remaining allowance from local files; it derives the displayed remaining percentage from provider `usedPercent` at the presentation boundary.
 
 On launch, on the coarse automatic cadence, or after Refresh it locates a local Codex CLI (`codex` on `PATH`, then the CLI bundled in ChatGPT.app), starts a **private** `codex app-server --stdio`, and reads ChatGPT-plan rate limits over JSON-RPC. The child process is torn down after the read. Codex continues to own its own login; Observatory does not copy credentials or talk to an Observatory server.
 
@@ -48,7 +48,7 @@ AI Observatory is a **working Codex-only Labs prototype** and has passed its ini
 
 The core interaction is validated in real use: quota stays glanceable in the menu bar and refreshes automatically on a coarse 15-minute cadence, while manual Refresh remains available for an immediate provider read.
 
-Post-implementation validation confirmed the full path end to end. A `9%` snapshot fetched at `00:19` automatically advanced to `10%` at `00:34` after real Codex usage, without manual Refresh or relaunch.
+Post-implementation validation confirmed the full path end to end. The historical source used value moved from `9%` at `00:19` to `10%` at `00:34` after real Codex usage, without manual Refresh or relaunch; the shipped surface now shows the complementary remaining value.
 
 The project remains intentionally narrow. Packaging, distribution, and additional providers are open questions rather than current commitments.
 
