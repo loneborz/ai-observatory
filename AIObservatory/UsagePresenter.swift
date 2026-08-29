@@ -185,6 +185,11 @@ final class UsagePresenter: ObservableObject {
             isRefreshing = false
             fputs("usage-state: available verification=exhausted used=99/50 nearExhaustion=true\n", stderr)
             return true
+        case "full":
+            state = .available(.verificationFull)
+            isRefreshing = false
+            fputs("usage-state: available verification=full used=0/0 nearExhaustion=false\n", stderr)
+            return true
         default:
             return false
         }
@@ -242,6 +247,35 @@ extension UsageSnapshot {
                     id: "codex-weekly",
                     title: "codex",
                     usedPercent: 50,
+                    windowDurationMins: 10_080,
+                    resetsAt: fetchedAt.addingTimeInterval(86_400)
+                )
+            ],
+            hasCredits: false,
+            creditBalance: "0",
+            rateLimitReachedType: nil,
+            earnedResetCount: 0,
+            fetchedAt: fetchedAt
+        )
+    }
+
+    /// Layout-only fixture for verifying the three-digit 100% presentation. Not a live quota read.
+    static var verificationFull: UsageSnapshot {
+        let fetchedAt = Date(timeIntervalSince1970: 1_767_000_000)
+        return UsageSnapshot(
+            planType: "plus",
+            windows: [
+                UsageWindow(
+                    id: "codex-five-hour",
+                    title: "codex",
+                    usedPercent: 0,
+                    windowDurationMins: 300,
+                    resetsAt: fetchedAt.addingTimeInterval(18_000)
+                ),
+                UsageWindow(
+                    id: "codex-weekly",
+                    title: "codex",
+                    usedPercent: 0,
                     windowDurationMins: 10_080,
                     resetsAt: fetchedAt.addingTimeInterval(86_400)
                 )

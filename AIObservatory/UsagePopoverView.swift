@@ -173,7 +173,7 @@ private struct AvailableUsageView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if !snapshot.primaryQuotaWindows.isEmpty {
-                HStack(alignment: .top, spacing: 14) {
+                HStack(alignment: .top, spacing: 8) {
                     ForEach(snapshot.primaryQuotaWindows) { window in
                         QuotaBlock(
                             window: window,
@@ -255,14 +255,20 @@ private struct QuotaBlock: View {
                             )
                             .monospacedDigit()
                         )
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                         .foregroundStyle(
                             nearExhaustion
                                 ? Color(nsColor: .systemOrange)
-                                : Color.primary.opacity(emphasized ? 1 : 0.88)
+                                : Color.primary
                         )
                 }
                 Text("Remaining")
                     .font(.caption2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .allowsTightening(true)
                     .foregroundStyle(.secondary)
             }
 
