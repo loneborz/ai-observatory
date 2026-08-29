@@ -178,12 +178,12 @@ final class UsagePresenter: ObservableObject {
         case "healthy":
             state = .available(.verificationHealthy)
             isRefreshing = false
-            fputs("usage-state: available verification=healthy percent=72 nearExhaustion=false\n", stderr)
+            fputs("usage-state: available verification=healthy used=40/72 nearExhaustion=false\n", stderr)
             return true
         case "exhausted":
             state = .available(.verificationExhausted)
             isRefreshing = false
-            fputs("usage-state: available verification=exhausted percent=99 nearExhaustion=true\n", stderr)
+            fputs("usage-state: available verification=exhausted used=99/50 nearExhaustion=true\n", stderr)
             return true
         default:
             return false
@@ -202,6 +202,13 @@ extension UsageSnapshot {
         return UsageSnapshot(
             planType: "plus",
             windows: [
+                UsageWindow(
+                    id: "codex-five-hour",
+                    title: "codex",
+                    usedPercent: 40,
+                    windowDurationMins: 300,
+                    resetsAt: fetchedAt.addingTimeInterval(18_000)
+                ),
                 UsageWindow(
                     id: "codex-weekly",
                     title: "codex",
@@ -225,9 +232,16 @@ extension UsageSnapshot {
             planType: "plus",
             windows: [
                 UsageWindow(
-                    id: "codex-weekly",
+                    id: "codex-five-hour",
                     title: "codex",
                     usedPercent: 99,
+                    windowDurationMins: 300,
+                    resetsAt: fetchedAt.addingTimeInterval(18_000)
+                ),
+                UsageWindow(
+                    id: "codex-weekly",
+                    title: "codex",
+                    usedPercent: 50,
                     windowDurationMins: 10_080,
                     resetsAt: fetchedAt.addingTimeInterval(86_400)
                 )

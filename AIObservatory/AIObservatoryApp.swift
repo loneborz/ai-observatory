@@ -43,10 +43,15 @@ private struct MenuBarLabel: View {
 
     var body: some View {
         switch presenter.menuBarAppearance {
-        case .percent(let percent, let nearExhaustion):
-            Image(nsImage: StatusItemImage.percent(percent, warning: nearExhaustion))
-                .renderingMode(nearExhaustion ? .original : .template)
-                .accessibilityLabel("AI Observatory, \(percent)% remaining")
+        case .quotas(let quotas):
+            let hasWarning = quotas.contains { $0.nearExhaustion }
+            Image(nsImage: StatusItemImage.quotas(quotas))
+                .renderingMode(hasWarning ? .original : .template)
+                .accessibilityLabel(
+                    "AI Observatory, " + quotas.map {
+                        "\($0.remainingPercent)% remaining \($0.shortLabel)"
+                    }.joined(separator: ", ")
+                )
         case .glyph:
             Image(systemName: "gauge")
                 .accessibilityLabel("AI Observatory, Codex usage")
@@ -55,23 +60,59 @@ private struct MenuBarLabel: View {
 }
 
 private enum StatusItemImage {
-    static func percent(_ percent: Int, warning: Bool) -> NSImage {
-        let text = "\(percent)%" as NSString
-        let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-        let color: NSColor = warning ? .systemOrange : .black
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: color,
-        ]
-        let textSize = text.size(withAttributes: attributes)
-        let size = NSSize(width: ceil(textSize.width), height: ceil(max(textSize.height, 18)))
-        let image = NSImage(size: size, flipped: false) { rect in
-            let origin = NSPoint(x: 0, y: (rect.height - textSize.height) / 2)
-            text.draw(at: origin, withAttributes: attributes)
+    static func quotas(_ quotas: [MenuBarQuota]) -> NSImage {
+        guard quotas.count > 1 else {
+            return singleLine(quotas.first)
+        }
+
+        let lines = quotas.prefix(2).map(attributedLine)
+        let lineSizes = lines.map { $0.size() }
+        let width = ceil(lineSizes.map(\.width).max() ?? 0)
+        let height = 20.0
+        let image = NSImage(size: NSSize(width: width, height: height), flipped: false) { rect in
+            let lineHeight = rect.height / 2
+            for (index, line) in lines.enumerated() {
+                line.draw(at: NSPoint(x: 0, y: rect.height - CGFloat(index + 1) * lineHeight))
+            }
             return true
         }
-        image.isTemplate = !warning
+        image.isTemplate = !quotas.contains { $0.nearExhaustion }
         return image
+    }
+
+    private static func singleLine(_ quota: MenuBarQuota?) -> NSImage {
+        guard let quota else {
+            return NSImage(size: NSSize(width: 1, height: 18))
+        }
+        let line = attributedLine(quota)
+        let lineSize = line.size()
+        let size = NSSize(width: ceil(lineSize.width), height: ceil(max(lineSize.height, 18)))
+        let image = NSImage(size: size, flipped: false) { rect in
+            line.draw(at: NSPoint(x: 0, y: (rect.height - lineSize.height) / 2))
+            return true
+        }
+        image.isTemplate = !quota.nearExhaustion
+        return image
+    }
+
+    private static func attributedLine(_ quota: MenuBarQuota) -> NSAttributedString {
+        let line = NSMutableAttributedString(
+            string: "\(quota.remainingPercent)%",
+            attributes: [
+                .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: quota.nearExhaustion ? .medium : .regular),
+                .foregroundColor: quota.nearExhaustion ? NSColor.systemOrange : NSColor.labelColor,
+            ]
+        )
+        line.append(
+            NSAttributedString(
+                string: " \(quota.shortLabel)",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 8, weight: .medium),
+                    .foregroundColor: quota.nearExhaustion ? NSColor.systemOrange : NSColor.labelColor,
+                ]
+            )
+        )
+        return line
     }
 }
 
